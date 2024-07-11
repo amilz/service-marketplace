@@ -931,6 +931,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kaigan"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6dd100976df9dd59d0c3fecf6f9ad3f161a087374d1b2a77ebb4ad8920f11bb"
+dependencies = [
+ "borsh 0.10.3",
+]
+
+[[package]]
 name = "keccak"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1052,6 +1061,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "nifty-asset"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3015c1e244538890aa5578af1d751f8609971a152bae600bc05454ace94ed3e"
+dependencies = [
+ "borsh 0.10.3",
+ "kaigan",
+ "nifty-asset-types",
+ "num-derive 0.3.3",
+ "num-traits",
+ "solana-program",
+ "thiserror",
+]
+
+[[package]]
+name = "nifty-asset-types"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bf1c2da581b31a71428eaf5cf36dba6946e261ea2eebe8e5d186940fca1498c"
+dependencies = [
+ "borsh 0.10.3",
+ "bytemuck",
+ "podded",
+ "solana-program",
+ "thiserror",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1059,6 +1096,17 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
+]
+
+[[package]]
+name = "num-derive"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -1138,6 +1186,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "216eaa586a190f0a738f2f918511eecfa90f13295abec0e457cdebcceda80cbd"
 dependencies = [
  "crypto-mac",
+]
+
+[[package]]
+name = "podded"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5ef03855395ea7838e038410cf2be5dd419fa65560c3c82dfcf1ee5b32cfb4e"
+dependencies = [
+ "bytemuck",
 ]
 
 [[package]]
@@ -1436,6 +1493,8 @@ name = "service-marketplace"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "nifty-asset",
+ "nifty-asset-types",
 ]
 
 [[package]]
@@ -1559,7 +1618,7 @@ dependencies = [
  "log",
  "memoffset",
  "num-bigint",
- "num-derive",
+ "num-derive 0.4.2",
  "num-traits",
  "parking_lot",
  "rand 0.8.5",

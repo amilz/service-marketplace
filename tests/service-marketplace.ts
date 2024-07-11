@@ -1,16 +1,21 @@
-import { setupTest } from "./utils/fixtures";
+import { setupTest, TestSetup } from "./utils/fixtures";
 import { createServiceOffering, fetchServiceOffering } from "./utils/transactions";
 import { findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas";
 import { assert, expect } from "chai";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { ServiceMarketplace } from "../target/types/service_marketplace";
+import { Program } from "@coral-xyz/anchor";
 
 describe("Service Marketplace", () => {
-  let program, vendor1, vendor2, ossProgramId;
+  let program: Program<ServiceMarketplace>;
+  let vendor1: Keypair;
 
   before(async () => {
-    ({ program, vendor1, vendor2, ossProgramId } = await setupTest());
+    const setup = await setupTest();
+    program = setup.program;
+    vendor1 = setup.vendor1;
   });
-
+  
   describe("Service Offering Creation", () => {
     const offeringDetails = {
       offeringName: "Test Offering",
@@ -27,7 +32,7 @@ describe("Service Marketplace", () => {
     });
 
     it("should successfully create a new service offering", async () => {
-      const tx = await createServiceOffering(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset, ossProgramId);
+      const tx = await createServiceOffering(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset);
       assert.ok(tx, "Transaction should be successful");
 
       const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);

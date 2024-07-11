@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
+import { OSS_PROGRAM_ID } from "./keys";
 
-export async function createServiceOffering(program, vendor, offeringDetails, serviceOffering, offeringGroupAsset, ossProgramId) {
+export async function createServiceOffering(program, vendor, offeringDetails, serviceOffering, offeringGroupAsset) {
     return program.methods
       .createServiceOffering(
         offeringDetails.offeringName,
@@ -12,7 +13,7 @@ export async function createServiceOffering(program, vendor, offeringDetails, se
         vendor: vendor.publicKey,
         serviceOffering,
         offeringGroupAsset,
-        ossProgram: ossProgramId,
+        ossProgram: OSS_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([vendor])

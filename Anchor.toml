@@ -16,3 +16,7 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/service-marketplace.ts"
+
+[[test.genesis]]
+address = "AssetGtQBTSgm5s91d1RAQod5JmaZiJDxqsgtqrZud73"
+program = "./tests/genesis/asset_0.6.so"

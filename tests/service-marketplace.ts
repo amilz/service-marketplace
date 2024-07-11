@@ -4,7 +4,7 @@ import { findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas"
 import { assert, expect } from "chai";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { ServiceMarketplace } from "../target/types/service_marketplace";
-import { Program } from "@coral-xyz/anchor";
+import { Program, BN } from "@coral-xyz/anchor";
 
 describe("Service Marketplace", () => {
   let program: Program<ServiceMarketplace>;
@@ -15,13 +15,19 @@ describe("Service Marketplace", () => {
     program = setup.program;
     vendor1 = setup.vendor1;
   });
-  
+
   describe("Service Offering Creation", () => {
     const offeringDetails = {
       offeringName: "Test Offering",
       maxQuantity: 10,
       solPrice: LAMPORTS_PER_SOL,
       expiresAt: null,
+      symbol: "TEST",
+      description: "Test Offering Description",
+      uri: "https://test.com",
+      image: "https://test.com/image.png",
+      royaltyBasisPoints: new BN(100),
+      termsOfServiceUri: "https://test.com/tos.pdf",
     };
 
     let serviceOffering, offeringGroupAsset;
@@ -42,6 +48,9 @@ describe("Service Marketplace", () => {
       assert.equal(serviceOfferingAccount.solPrice.toNumber(), offeringDetails.solPrice, "SOL price doesn't match");
       assert.isTrue(serviceOfferingAccount.active, "Service offering should be active");
       assert.equal(serviceOfferingAccount.numSold.toNumber(), 0, "Initial number sold should be 0");
+
+      // TODO: add assertions for the group asset
+
     });
 
     it.skip("should fail to create a service offering with invalid max quantity", async () => {

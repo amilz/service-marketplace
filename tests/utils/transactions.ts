@@ -8,6 +8,12 @@ export async function createServiceOffering(program, vendor, offeringDetails, se
         new anchor.BN(offeringDetails.maxQuantity),
         new anchor.BN(offeringDetails.solPrice),
         offeringDetails.expiresAt,
+        offeringDetails.symbol,
+        offeringDetails.description,
+        offeringDetails.uri,
+        offeringDetails.image,
+        offeringDetails.royaltyBasisPoints,
+        offeringDetails.termsOfServiceUri,
       )
       .accountsPartial({
         vendor: vendor.publicKey,

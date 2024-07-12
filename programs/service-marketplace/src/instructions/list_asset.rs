@@ -1,6 +1,5 @@
 use crate::{Listing, ListingError, SEED_LISTING};
 use anchor_lang::{
-    accounts::signer,
     prelude::*,
     solana_program::program::{invoke, invoke_signed},
 };

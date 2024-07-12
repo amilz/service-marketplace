@@ -76,12 +76,21 @@ export async function fetchListing(program: anchor.Program<ServiceMarketplace>, 
 }
 
 
-export async function buyListing(program, listing, buyer, asset, groupAsset, seller) {
+export async function buyListing(
+    program, 
+    listing, 
+    buyer, 
+    asset, 
+    groupAsset, 
+    seller, 
+    royaltyReceiver
+) {
     const accounts = {
         buyer: buyer.publicKey,
         seller: seller.publicKey,
         asset: asset.publicKey,
         groupAsset,
+        royaltyReceiver: royaltyReceiver.publicKey,
         listing,
         ossProgram: OSS_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,

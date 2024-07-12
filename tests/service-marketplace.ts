@@ -60,16 +60,16 @@ describe("Service Marketplace", () => {
 
   });
 
-  it.skip("should fail to create a service offering with invalid max quantity", async () => {
+/*   it("should fail to create a service offering with invalid max quantity", async () => {
     const invalidOfferingDetails = { ...offeringDetails, maxQuantity: -1 };
     // TODO: Add test for invalid inputs
   });
 
-  it.skip("should fail to create a service offering with invalid price", async () => {
+  it("should fail to create a service offering with invalid price", async () => {
     const invalidOfferingDetails = { ...offeringDetails, solPrice: -1 };
     // TODO: Add test for invalid inputs
   });
-
+ */
 
   it("should successfully buy a service offering", async () => {
     const tx = await buyService(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset, buyer1, newAsset);
@@ -96,9 +96,10 @@ describe("Service Marketplace", () => {
     assert.equal(listingAccount.price.toNumber(), listingDetails.solPrice, "Price doesn't match");
   });
   it("should successfully buy a listing", async () => {
-    const tx = await buyListing(program, listing, buyer2, newAsset, offeringGroupAsset, buyer1);
+    const tx = await buyListing(program, listing, buyer2, newAsset, offeringGroupAsset, buyer1, vendor1);
     assert.ok(tx, "Transaction should be successful");
-    console.log(tx);
+
+
   });
 
   // Add more describe blocks for other functionalities

@@ -1,12 +1,14 @@
 use crate::{Listing, ListingError, SEED_LISTING};
 use anchor_lang::{
     prelude::*,
-    solana_program::program:: invoke_signed,
+    solana_program::program::invoke_signed,
     system_program::{transfer, Transfer},
 };
 
 use nifty_asset::{
-    accounts::Asset, instructions::{TransferBuilder, UnlockBuilder},  ID as NIFTY_ASSET_PROGRAM_ID
+    accounts::Asset,
+    instructions::{TransferBuilder, UnlockBuilder},
+    ID as NIFTY_ASSET_PROGRAM_ID,
 };
 
 #[derive(Accounts)]
@@ -58,9 +60,29 @@ pub fn handler(ctx: Context<BuyListing>) -> Result<()> {
     let asset: Asset = Asset::try_from(&ctx.accounts.asset.to_account_info())?;
 
     require!(listing.is_active(), ListingError::ListingNotActive);
-    require!(asset.group.to_option() == Some(ctx.accounts.group_asset.key()), ListingError::InvalidGroup);
+    require!(
+        asset.group.to_option() == Some(ctx.accounts.group_asset.key()),
+        ListingError::InvalidGroup
+    );
 
     // Process payment
+    let _group_data = (*ctx.accounts.group_asset.data).borrow();
+    let royalty_basis_points: u64 = 100; // Placeholder for now
+
+    // TODO Deserialize the group data
+
+    let price = listing.price;
+
+    // Calculate payment amount
+    let payment_amount = price
+        .checked_mul(royalty_basis_points)
+        .and_then(|product| product.checked_div(10_000))
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+
+    // Calculate royalty amount
+    let _royalty_amount = price
+        .checked_sub(payment_amount)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
 
     transfer(
         CpiContext::new(
@@ -70,8 +92,20 @@ pub fn handler(ctx: Context<BuyListing>) -> Result<()> {
                 to: ctx.accounts.seller.to_account_info(),
             },
         ),
-        listing.price,
+        payment_amount,
     )?;
+
+    // Transfer royalties
+    /*     transfer(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.buyer.to_account_info(),
+                to: ctx.accounts.royalties_receiver.to_account_info(),
+            },
+        ),
+        royalty_amount,
+    )?; */
 
     // Unlock the asset
 

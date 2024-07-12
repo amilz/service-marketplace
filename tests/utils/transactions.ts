@@ -1,8 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { OSS_PROGRAM_ID } from "./keys";
+import { ServiceMarketplace } from "../../target/types/service_marketplace";
 
 export async function createServiceOffering(program, vendor, offeringDetails, serviceOffering, offeringGroupAsset) {
-    console.log("should be created: ", serviceOffering.toString());
     return program.methods
         .createServiceOffering(
             offeringDetails.offeringName,
@@ -43,8 +43,6 @@ export async function buyService(program, vendor, offeringDetails, serviceOfferi
         systemProgram: anchor.web3.SystemProgram.programId,
     }
 
-    logAccounts(accounts);
-
     return program.methods
         .buyService(
             offeringDetails.offeringName,
@@ -53,6 +51,30 @@ export async function buyService(program, vendor, offeringDetails, serviceOfferi
         .signers([buyer, newAsset])
         .rpc({ skipPreflight: true, commitment: "processed" });
 }
+
+export async function listAsset(program, listingDetails, seller, asset, listing) {
+    const accounts = {
+        seller: seller.publicKey,
+        asset: asset.publicKey,
+        listing,
+        ossProgram: OSS_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    }
+
+    return program.methods
+        .listAsset(
+            new anchor.BN(listingDetails.solPrice),
+            listingDetails.expiresAt,
+        )
+        .accountsPartial(accounts)
+        .signers([seller])
+        .rpc({ skipPreflight: true, commitment: "processed" });
+}
+
+export async function fetchListing(program: anchor.Program<ServiceMarketplace>, listing) {
+    return program.account.listing.fetch(listing);
+}
+
 
 function logAccounts(accounts: Record<string, anchor.web3.PublicKey>) {
     console.log("Account Details:");

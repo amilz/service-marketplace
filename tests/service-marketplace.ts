@@ -1,6 +1,6 @@
 import { setupTest } from "./utils/fixtures";
-import { createServiceOffering, fetchServiceOffering, buyService } from "./utils/transactions";
-import { findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas";
+import { createServiceOffering, fetchServiceOffering, buyService, listAsset, fetchListing } from "./utils/transactions";
+import { findListingPDA, findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas";
 import { assert, expect } from "chai";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { ServiceMarketplace } from "../target/types/service_marketplace";
@@ -18,65 +18,82 @@ describe("Service Marketplace", () => {
     buyer1 = setup.buyer1;
   });
 
-  describe("Service Offering Creation", () => {
-    const offeringDetails = {
-      offeringName: "Test Offering",
-      maxQuantity: 10,
-      solPrice: LAMPORTS_PER_SOL,
+  const offeringDetails = {
+    offeringName: "Test Offering",
+    maxQuantity: 10,
+    solPrice: LAMPORTS_PER_SOL,
+    expiresAt: null,
+    symbol: "TEST",
+    description: "Test Offering Description",
+    uri: "https://test.com",
+    image: "https://test.com/image.png",
+    royaltyBasisPoints: new BN(100),
+    termsOfServiceUri: "https://test.com/tos.pdf",
+    isTransferrable: true,
+  };
+
+  let serviceOffering, offeringGroupAsset, newAsset;
+
+  before(() => {
+    [serviceOffering] = findServiceOfferingPDA(vendor1.publicKey, offeringDetails.offeringName, program.programId);
+    [offeringGroupAsset] = findOfferingGroupAssetPDA(serviceOffering, program.programId);
+    newAsset = Keypair.generate();
+  });
+
+  it("should successfully create a new service offering", async () => {
+    const tx = await createServiceOffering(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset);
+    assert.ok(tx, "Transaction should be successful");
+
+    const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);
+
+    assert.equal(serviceOfferingAccount.vendor.toBase58(), vendor1.publicKey.toBase58(), "Vendor pubkey doesn't match");
+    assert.equal(serviceOfferingAccount.maxQuantity.toNumber(), offeringDetails.maxQuantity, "Max quantity doesn't match");
+    assert.equal(serviceOfferingAccount.solPrice.toNumber(), offeringDetails.solPrice, "SOL price doesn't match");
+    assert.isTrue(serviceOfferingAccount.active, "Service offering should be active");
+    assert.equal(serviceOfferingAccount.numSold.toNumber(), 0, "Initial number sold should be 0");
+
+    // TODO: add assertions for the group asset
+
+  });
+
+  it.skip("should fail to create a service offering with invalid max quantity", async () => {
+    const invalidOfferingDetails = { ...offeringDetails, maxQuantity: -1 };
+    // TODO: Add test for invalid inputs
+  });
+
+  it.skip("should fail to create a service offering with invalid price", async () => {
+    const invalidOfferingDetails = { ...offeringDetails, solPrice: -1 };
+    // TODO: Add test for invalid inputs
+  });
+
+
+  it("should successfully buy a service offering", async () => {
+    const tx = await buyService(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset, buyer1, newAsset);
+    assert.ok(tx, "Transaction should be successful");
+
+    const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);
+
+    assert.equal(serviceOfferingAccount.numSold.toNumber(), 1, "Number of sold services should be incremented");
+  });
+
+  it("should successfully list an asset", async () => {
+    const listingDetails = {
+      solPrice: 2 * LAMPORTS_PER_SOL,
       expiresAt: null,
-      symbol: "TEST",
-      description: "Test Offering Description",
-      uri: "https://test.com",
-      image: "https://test.com/image.png",
-      royaltyBasisPoints: new BN(100),
-      termsOfServiceUri: "https://test.com/tos.pdf",
-      isTransferrable: true,
     };
+    const [listing] = findListingPDA(newAsset.publicKey, buyer1.publicKey, program.programId);
 
-    let serviceOffering, offeringGroupAsset;
+    const tx = await listAsset(program, listingDetails, buyer1, newAsset, listing);
+    assert.ok(tx, "Transaction should be successful");
 
-    before(() => {
-      [serviceOffering] = findServiceOfferingPDA(vendor1.publicKey, offeringDetails.offeringName, program.programId);
-      [offeringGroupAsset] = findOfferingGroupAssetPDA(serviceOffering, program.programId);
-    });
+    const listingAccount = await fetchListing(program, listing);
 
-    it("should successfully create a new service offering", async () => {
-      const tx = await createServiceOffering(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset);
-      assert.ok(tx, "Transaction should be successful");
+    assert.equal(listingAccount.seller.toBase58(), buyer1.publicKey.toBase58(), "Seller pubkey doesn't match");
+    assert.equal(listingAccount.assetId.toBase58(), newAsset.publicKey.toBase58(), "Asset pubkey doesn't match");
+    assert.equal(listingAccount.price.toNumber(), listingDetails.solPrice, "Price doesn't match");
 
-      const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);
-
-      assert.equal(serviceOfferingAccount.vendor.toBase58(), vendor1.publicKey.toBase58(), "Vendor pubkey doesn't match");
-      assert.equal(serviceOfferingAccount.maxQuantity.toNumber(), offeringDetails.maxQuantity, "Max quantity doesn't match");
-      assert.equal(serviceOfferingAccount.solPrice.toNumber(), offeringDetails.solPrice, "SOL price doesn't match");
-      assert.isTrue(serviceOfferingAccount.active, "Service offering should be active");
-      assert.equal(serviceOfferingAccount.numSold.toNumber(), 0, "Initial number sold should be 0");
-
-      // TODO: add assertions for the group asset
-
-    });
-
-    it.skip("should fail to create a service offering with invalid max quantity", async () => {
-      const invalidOfferingDetails = { ...offeringDetails, maxQuantity: -1 };
-      // TODO: Add test for invalid inputs
-    });
-
-    it.skip("should fail to create a service offering with invalid price", async () => {
-      const invalidOfferingDetails = { ...offeringDetails, solPrice: -1 };
-      // TODO: Add test for invalid inputs
-    });
-
-
-    it("should successfully buy a service offering", async () => {
-      const newAsset = Keypair.generate();
-      const tx = await buyService(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset, buyer1, newAsset);
-      assert.ok(tx, "Transaction should be successful");
-
-      const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);
-
-      assert.equal(serviceOfferingAccount.numSold.toNumber(), 1, "Number of sold services should be incremented");
-    });
   });
 
   // Add more describe blocks for other functionalities
 });
+

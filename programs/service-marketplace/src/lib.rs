@@ -1,9 +1,9 @@
+use anchor_lang::prelude::*;
+
 pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
-
-use anchor_lang::prelude::*;
 
 pub use constants::*;
 pub use error::*;
@@ -49,4 +49,9 @@ pub mod service_marketplace {
     pub fn buy_service(ctx: Context<BuyService>, offering_name: String) -> Result<()> {
         buy_service::handler(ctx, offering_name)
     }
+
+    pub fn list_asset(ctx: Context<ListAsset>, price: u64, expires_at: Option<i64>) -> Result<()> {
+        list_asset::handler(ctx, price, expires_at)
+    }
 }
+

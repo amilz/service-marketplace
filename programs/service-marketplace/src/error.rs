@@ -11,3 +11,18 @@ pub enum ServiceOfferingError {
     #[msg("Invalid OSS program")]
     InvalidOssProgram,
 }
+
+#[error_code]
+pub enum ListingError {
+    #[msg("Listing is not active")]
+    ListingNotActive,
+
+    #[msg("Invalid OSS program")]
+    InvalidOssProgram,
+
+    #[msg("Asset is soulbound")]
+    AssetIsSoulbound,
+
+    #[msg("Asset is locked")]
+    AssetIsLocked,
+}

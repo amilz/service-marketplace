@@ -66,11 +66,6 @@ pub fn handler(ctx: Context<BuyService>, offering_name: String) -> Result<()> {
         offering_name.as_bytes(),
         &[ctx.bumps.service_offering],
     ];
-    let asset_seeds = &[
-        SEED_SERVICE_OFFERING_GROUP.as_bytes(),
-        service_offering_key.as_ref(),
-        &[ctx.bumps.offering_group_asset],
-    ];
 
     let combined_signer_seeds = &[&service_offering_seeds[..]];
 

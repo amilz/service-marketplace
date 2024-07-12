@@ -25,4 +25,7 @@ pub enum ListingError {
 
     #[msg("Asset is locked")]
     AssetIsLocked,
+
+    #[msg("Invalid group")]
+    InvalidGroup,
 }

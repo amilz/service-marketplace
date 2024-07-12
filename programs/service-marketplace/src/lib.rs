@@ -53,5 +53,9 @@ pub mod service_marketplace {
     pub fn list_asset(ctx: Context<ListAsset>, price: u64, expires_at: Option<i64>) -> Result<()> {
         list_asset::handler(ctx, price, expires_at)
     }
+
+    pub fn buy_listing(ctx: Context<BuyListing>) -> Result<()> {
+        buy_listing::handler(ctx)
+    }
 }
 

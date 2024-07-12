@@ -76,6 +76,28 @@ export async function fetchListing(program: anchor.Program<ServiceMarketplace>, 
 }
 
 
+export async function buyListing(program, listing, buyer, asset, groupAsset, seller) {
+    const accounts = {
+        buyer: buyer.publicKey,
+        seller: seller.publicKey,
+        asset: asset.publicKey,
+        groupAsset,
+        listing,
+        ossProgram: OSS_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    }
+
+    return program.methods
+        .buyListing()
+        .accountsPartial(accounts)
+        .signers([buyer])
+        .rpc({ skipPreflight: true, commitment: "processed" });
+}
+
+
+
+
+
 function logAccounts(accounts: Record<string, anchor.web3.PublicKey>) {
     console.log("Account Details:");
     Object.entries(accounts).forEach(([name, pubkey]) => {

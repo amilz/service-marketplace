@@ -1,5 +1,5 @@
 import { setupTest } from "./utils/fixtures";
-import { createServiceOffering, fetchServiceOffering, buyService, listAsset, fetchListing } from "./utils/transactions";
+import { createServiceOffering, fetchServiceOffering, buyService, listAsset, fetchListing, buyListing } from "./utils/transactions";
 import { findListingPDA, findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas";
 import { assert, expect } from "chai";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -10,12 +10,14 @@ describe("Service Marketplace", () => {
   let program: Program<ServiceMarketplace>;
   let vendor1: Keypair;
   let buyer1: Keypair;
+  let buyer2: Keypair;
 
   before(async () => {
     const setup = await setupTest();
     program = setup.program;
     vendor1 = setup.vendor1;
     buyer1 = setup.buyer1;
+    buyer2 = setup.buyer2;
   });
 
   const offeringDetails = {
@@ -32,12 +34,14 @@ describe("Service Marketplace", () => {
     isTransferrable: true,
   };
 
-  let serviceOffering, offeringGroupAsset, newAsset;
+  let serviceOffering, offeringGroupAsset, newAsset, listing;
 
   before(() => {
     [serviceOffering] = findServiceOfferingPDA(vendor1.publicKey, offeringDetails.offeringName, program.programId);
     [offeringGroupAsset] = findOfferingGroupAssetPDA(serviceOffering, program.programId);
     newAsset = Keypair.generate();
+    [listing] = findListingPDA(newAsset.publicKey, buyer1.publicKey, program.programId);
+
   });
 
   it("should successfully create a new service offering", async () => {
@@ -81,7 +85,6 @@ describe("Service Marketplace", () => {
       solPrice: 2 * LAMPORTS_PER_SOL,
       expiresAt: null,
     };
-    const [listing] = findListingPDA(newAsset.publicKey, buyer1.publicKey, program.programId);
 
     const tx = await listAsset(program, listingDetails, buyer1, newAsset, listing);
     assert.ok(tx, "Transaction should be successful");
@@ -91,7 +94,11 @@ describe("Service Marketplace", () => {
     assert.equal(listingAccount.seller.toBase58(), buyer1.publicKey.toBase58(), "Seller pubkey doesn't match");
     assert.equal(listingAccount.assetId.toBase58(), newAsset.publicKey.toBase58(), "Asset pubkey doesn't match");
     assert.equal(listingAccount.price.toNumber(), listingDetails.solPrice, "Price doesn't match");
-
+  });
+  it("should successfully buy a listing", async () => {
+    const tx = await buyListing(program, listing, buyer2, newAsset, offeringGroupAsset, buyer1);
+    assert.ok(tx, "Transaction should be successful");
+    console.log(tx);
   });
 
   // Add more describe blocks for other functionalities

@@ -1,5 +1,5 @@
-import { setupTest, TestSetup } from "./utils/fixtures";
-import { createServiceOffering, fetchServiceOffering } from "./utils/transactions";
+import { setupTest } from "./utils/fixtures";
+import { createServiceOffering, fetchServiceOffering, buyService } from "./utils/transactions";
 import { findOfferingGroupAssetPDA, findServiceOfferingPDA } from "./utils/pdas";
 import { assert, expect } from "chai";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -9,11 +9,13 @@ import { Program, BN } from "@coral-xyz/anchor";
 describe("Service Marketplace", () => {
   let program: Program<ServiceMarketplace>;
   let vendor1: Keypair;
+  let buyer1: Keypair;
 
   before(async () => {
     const setup = await setupTest();
     program = setup.program;
     vendor1 = setup.vendor1;
+    buyer1 = setup.buyer1;
   });
 
   describe("Service Offering Creation", () => {
@@ -28,6 +30,7 @@ describe("Service Marketplace", () => {
       image: "https://test.com/image.png",
       royaltyBasisPoints: new BN(100),
       termsOfServiceUri: "https://test.com/tos.pdf",
+      isTransferrable: true,
     };
 
     let serviceOffering, offeringGroupAsset;
@@ -61,6 +64,17 @@ describe("Service Marketplace", () => {
     it.skip("should fail to create a service offering with invalid price", async () => {
       const invalidOfferingDetails = { ...offeringDetails, solPrice: -1 };
       // TODO: Add test for invalid inputs
+    });
+
+
+    it("should successfully buy a service offering", async () => {
+      const newAsset = Keypair.generate();
+      const tx = await buyService(program, vendor1, offeringDetails, serviceOffering, offeringGroupAsset, buyer1, newAsset);
+      assert.ok(tx, "Transaction should be successful");
+
+      const serviceOfferingAccount = await fetchServiceOffering(program, serviceOffering);
+
+      assert.equal(serviceOfferingAccount.numSold.toNumber(), 1, "Number of sold services should be incremented");
     });
   });
 

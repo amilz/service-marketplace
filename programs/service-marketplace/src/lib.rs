@@ -28,6 +28,7 @@ pub mod service_marketplace {
         image: String,
         royalty_basis_points: u64,
         terms_of_service_uri: String,
+        is_transferrable: bool,
     ) -> Result<()> {
         create_service_offering::handler(
             ctx,
@@ -41,6 +42,11 @@ pub mod service_marketplace {
             image,
             royalty_basis_points,
             terms_of_service_uri,
+            is_transferrable,
         )
+    }
+
+    pub fn buy_service(ctx: Context<BuyService>, offering_name: String) -> Result<()> {
+        buy_service::handler(ctx, offering_name)
     }
 }

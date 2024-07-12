@@ -72,6 +72,7 @@ pub fn handler(
     image: String,
     royalty_basis_points: u64,
     terms_of_service_uri: String,
+    is_transferrable: bool,
 ) -> Result<()> {
     let service_offering = &mut ctx.accounts.service_offering;
     let vendor_key = ctx.accounts.vendor.key();
@@ -83,6 +84,7 @@ pub fn handler(
         max_quantity,
         sol_price,
         expires_at,
+        is_transferrable,
         ctx.bumps.service_offering,
     );
 
@@ -105,6 +107,7 @@ pub fn handler(
         ctx.accounts.offering_group_asset.to_account_info(),
         ctx.accounts.system_program.to_account_info(),
         ctx.accounts.oss_program.to_account_info(),
+        service_offering.to_account_info(),
     ];
 
     write_metadata(
@@ -148,7 +151,7 @@ pub fn handler(
     create_asset(
         &ctx.accounts.offering_group_asset.key(),
         &vendor_key,
-        &vendor_key,
+        &service_offering.key(),
         &ctx.accounts.system_program.key(),
         &account_infos,
         combined_signer_seeds,

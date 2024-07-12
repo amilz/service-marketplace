@@ -30,6 +30,9 @@ pub struct ServiceOffering {
     // Optional expiration timestamp for time-limited offerings
     pub expires_at: Option<i64>,
 
+    // Whether services are transferable or not
+    pub is_transferrable: bool,
+
     // The bump used in PDA derivation
     pub bump: u8
 }
@@ -58,7 +61,8 @@ impl ServiceOffering {
         8 +     // sol_price
         8 +     // created_at
         9 +     // expires_at (1 byte for Option enum + 8 bytes for i64)
-        1      // bump
+        1 +     // is_transferrable
+        1       // bump
     }
 
     pub fn create(
@@ -68,6 +72,7 @@ impl ServiceOffering {
         max_quantity: u64,
         sol_price: u64,
         expires_at: Option<i64>,
+        is_transferrable: bool,
         bump: u8,
     ) {
         self.vendor = vendor;
@@ -79,6 +84,7 @@ impl ServiceOffering {
         self.max_quantity = max_quantity;
         self.created_at = Clock::get().unwrap().unix_timestamp;
         self.expires_at = expires_at;
+        self.is_transferrable = is_transferrable;
         self.bump = bump;
     }
 
